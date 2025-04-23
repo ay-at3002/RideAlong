@@ -1,18 +1,45 @@
 import 'package:flutter/material.dart';
-import 'screens/enter_phone_screen.dart';
+import 'package:flutter/services.dart';
+import 'screens/home_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+    ),
+  );
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      title: 'Location Overlay Demo',
       debugShowCheckedModeBanner: false,
-      home: EnterPhoneScreen(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        fontFamily: 'SF Pro Display',
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF4285F4),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            textStyle: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+      ),
+      home: const HomeScreen(),
     );
   }
 }
