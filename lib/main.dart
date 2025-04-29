@@ -4,6 +4,7 @@ import 'screens/home_screen.dart';
 import 'screens/otp_input_screen.dart';
 import 'screens/phone_input_screen.dart';
 import 'screens/choice_screen.dart';
+import 'screens/gender_screen.dart';
 import 'screens/profile_setup_screen.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +45,7 @@ class MyApp extends StatelessWidget {
       ),
       // home: const HomeScreen(),
       // home : const PhoneInputScreen(),
-      home: const ProfileSetupScreen(),
+      home: const GenderSelectionScreen(),
     );
   }
 }
