@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/home_screen.dart';
@@ -6,12 +7,16 @@ import 'screens/phone_input_screen.dart';
 import 'screens/choice_screen.dart';
 import 'screens/gender_screen.dart';
 import 'screens/profile_setup_screen.dart';
-void main() {
+import 'firebase_options.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-    ),
+    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );
   runApp(const MyApp());
 }
@@ -44,8 +49,8 @@ class MyApp extends StatelessWidget {
         ),
       ),
       // home: const HomeScreen(),
-      // home : const PhoneInputScreen(),
-      home: const ProfileSetupScreen(),
+      home: const PhoneInputScreen(),
+      // home: const ProfileSetupScreen(),
     );
   }
 }

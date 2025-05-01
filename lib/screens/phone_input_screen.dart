@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 import 'otp_input_screen.dart';
 
 class PhoneInputScreen extends StatefulWidget {
@@ -10,6 +12,8 @@ class PhoneInputScreen extends StatefulWidget {
 
 class _PhoneInputScreenState extends State<PhoneInputScreen> {
   final TextEditingController _phoneController = TextEditingController();
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -24,6 +28,62 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
     super.dispose();
   }
 
+  Future<void> _verifyPhone() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _authService.verifyPhoneNumber(
+        phoneNumber: _phoneController.text,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // Auto-verify on Android if possible
+          await _authService.verifyOTP(
+            verificationId: credential.verificationId!,
+            smsCode: credential.smsCode!,
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          // Navigate to home or next screen
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Verification Failed: ${e.message}')),
+          );
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          setState(() {
+            _isLoading = false;
+          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => OtpInputScreen(
+                    phoneNumber: _phoneController.text,
+                    verificationId: verificationId,
+                  ),
+            ),
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          // Auto-retrieval timeout
+        },
+      );
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,10 +95,7 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
             children: [
               const SizedBox(height: 60),
               // Illustration
-              Image.asset(
-                'assets/images/otp_illustration.png',
-                height: 160,
-              ),
+              Image.asset('assets/images/otp_illustration.png', height: 160),
               const SizedBox(height: 40),
               // Title
               const Text(
@@ -54,10 +111,7 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
               const Text(
                 'We will send you a one-time password to this number',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color(0xFF767676),
-                ),
+                style: TextStyle(fontSize: 16, color: Color(0xFF767676)),
               ),
               const SizedBox(height: 40),
               // Phone number label
@@ -65,10 +119,7 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Enter Phone Number',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFFAAAAAA),
-                  ),
+                  style: TextStyle(fontSize: 16, color: Color(0xFFAAAAAA)),
                 ),
               ),
               const SizedBox(height: 8),
@@ -88,10 +139,7 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
                     borderSide: BorderSide(color: Color(0xFF2C65F6), width: 2),
                   ),
                 ),
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF333333),
-                ),
+                style: const TextStyle(fontSize: 18, color: Color(0xFF333333)),
               ),
               const Spacer(),
               // Get OTP Button
@@ -99,16 +147,7 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => OtpInputScreen(
-                          phoneNumber: _phoneController.text,
-                        ),
-                      ),
-                    );
-                  },
+                  onPressed: _isLoading ? null : _verifyPhone,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2C65F6),
                     foregroundColor: Colors.white,
@@ -116,13 +155,16 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
                       borderRadius: BorderRadius.circular(28),
                     ),
                   ),
-                  child: const Text(
-                    'Get OTP',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  child:
+                      _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                            'Get OTP',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                 ),
               ),
               const SizedBox(height: 40),
