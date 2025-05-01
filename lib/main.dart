@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
       ),
       // home: const HomeScreen(),
       // home : const PhoneInputScreen(),
-      home: const GenderSelectionScreen(),
+      home: const ProfileSetupScreen(),
     );
   }
 }

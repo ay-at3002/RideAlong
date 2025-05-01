@@ -11,7 +11,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[200],
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -19,6 +19,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               padding: const EdgeInsets.all(24.0),
               child: Card(
                 elevation: 0,
+                color: Colors.white ,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -103,10 +104,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       // Social Login Buttons
                       _buildSocialButton(
                         text: 'Continue with Google',
-                        icon: Image.network(
-                          'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
-                          height: 24,
-                          width: 24,
+                        icon: Image.asset(
+                              'assets/images/google_icon.png',
+                              height: 24,
+                              width: 24,
                         ),
                         onPressed: () {},
                         backgroundColor: Colors.white,
