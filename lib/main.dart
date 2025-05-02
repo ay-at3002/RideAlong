@@ -1,12 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'screens/home_screen.dart';
-import 'screens/otp_input_screen.dart';
+// import 'screens/home_screen.dart';
+// import 'screens/otp_input_screen.dart';
 import 'screens/phone_input_screen.dart';
-import 'screens/choice_screen.dart';
-import 'screens/gender_screen.dart';
-import 'screens/profile_setup_screen.dart';
+// import 'screens/choice_screen.dart';
+// import 'screens/gender_screen.dart';
+// import 'screens/profile_setup_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
