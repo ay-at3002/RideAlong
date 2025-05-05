@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart'; // Add this import for location service check
 import 'map_screen.dart';
-import 'phone_input_screen.dart'; // Add this import
+import 'phone_input_screen.dart';
 import '../widgets/location_service_overlay.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,22 +14,31 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _showLocationOverlay = true;
+  bool _locationServicesEnabled = false; // Track location services status
 
   @override
   void initState() {
     super.initState();
-    _checkLocationPermission();
+    _checkLocationRequirements();
   }
 
-  Future<void> _checkLocationPermission() async {
-    final status = await Permission.location.status;
+  Future<void> _checkLocationRequirements() async {
+    // Check if location services are enabled on the device
+    final servicesEnabled = await Geolocator.isLocationServiceEnabled();
+    
+    // Check app permission status
+    final permissionStatus = await Permission.location.status;
+    
     if (!mounted) return;
     
     setState(() {
-      _showLocationOverlay = !status.isGranted;
+      _locationServicesEnabled = servicesEnabled;
+      // Show overlay if either services are disabled or permission is not granted
+      _showLocationOverlay = !servicesEnabled || !permissionStatus.isGranted;
     });
 
-    if (status.isGranted) {
+    // If both location services are enabled and permission is granted, proceed to next screen
+    if (servicesEnabled && permissionStatus.isGranted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           Navigator.pushReplacement(
@@ -49,11 +59,20 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_showLocationOverlay)
             LocationServiceOverlay(
               onOpenSettings: () async {
-                await openAppSettings();
+                // Handle different settings based on what's missing
+                if (!_locationServicesEnabled) {
+                  // For location services being disabled
+                  await Geolocator.openLocationSettings();
+                } else {
+                  // For app permissions not granted
+                  await openAppSettings();
+                }
+                
                 // Check again after returning from settings
                 await Future.delayed(const Duration(seconds: 1));
-                await _checkLocationPermission();
+                await _checkLocationRequirements();
               },
+              locationServicesDisabled: !_locationServicesEnabled,
             ),
         ],
       ),
