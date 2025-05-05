@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'map_screen.dart';
+import 'phone_input_screen.dart'; // Add this import
 import '../widgets/location_service_overlay.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,9 +22,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _checkLocationPermission() async {
     final status = await Permission.location.status;
+    if (!mounted) return;
+    
+    setState(() {
+      _showLocationOverlay = !status.isGranted;
+    });
+
     if (status.isGranted) {
-      setState(() {
-        _showLocationOverlay = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const PhoneInputScreen()),
+          );
+        }
       });
     }
   }
