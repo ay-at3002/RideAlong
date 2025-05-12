@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:geolocator/geolocator.dart'; // Add this import for location service check
+import 'package:geolocator/geolocator.dart';
 import 'map_screen.dart';
 import 'phone_input_screen.dart';
 import '../widgets/location_service_overlay.dart';
@@ -12,14 +12,29 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _showLocationOverlay = true;
-  bool _locationServicesEnabled = false; // Track location services status
+  bool _locationServicesEnabled = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkLocationRequirements();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Check location requirements when app resumes from background
+    if (state == AppLifecycleState.resumed) {
+      _checkLocationRequirements();
+    }
   }
 
   Future<void> _checkLocationRequirements() async {
@@ -59,18 +74,14 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_showLocationOverlay)
             LocationServiceOverlay(
               onOpenSettings: () async {
-                // Handle different settings based on what's missing
                 if (!_locationServicesEnabled) {
-                  // For location services being disabled
                   await Geolocator.openLocationSettings();
                 } else {
-                  // For app permissions not granted
                   await openAppSettings();
                 }
                 
-                // Check again after returning from settings
-                await Future.delayed(const Duration(seconds: 1));
-                await _checkLocationRequirements();
+                // No need for delay here as we'll check in didChangeAppLifecycleState
+                // when the app resumes
               },
               locationServicesDisabled: !_locationServicesEnabled,
             ),
