@@ -1,4 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/src/services/predictive_back_event.dart';
+import '../mixins/location_aware_mixin.dart';
 
 class ChoiceScreen extends StatefulWidget {
   const ChoiceScreen({Key? key}) : super(key: key);
@@ -7,7 +11,7 @@ class ChoiceScreen extends StatefulWidget {
   State<ChoiceScreen> createState() => _ChoiceScreenState();
 }
 
-class _ChoiceScreenState extends State<ChoiceScreen> {
+class _ChoiceScreenState extends State<ChoiceScreen> with LocationAwareMixin {
   @override
   Widget build(BuildContext context) {
     const Color cardColor = Color(0xFF4285F4);
@@ -45,7 +49,12 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
               ),
               const SizedBox(height: 32),
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  // Verify location is enabled before proceeding
+                  if (await verifyLocationEnabled()) {
+                    // Handle ride taker selection
+                  }
+                },
                 child: Container(
                   height: cardHeight,
                   decoration: BoxDecoration(
@@ -61,7 +70,7 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                            children: const [
                               Text(
                                 "Ride Taker",
                                 style: TextStyle(
@@ -102,7 +111,12 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
               ),
               const SizedBox(height: 24),
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  // Verify location is enabled before proceeding
+                  if (await verifyLocationEnabled()) {
+                    // Handle ride giver selection
+                  }
+                },
                 child: Container(
                   height: cardHeight,
                   decoration: BoxDecoration(
@@ -118,7 +132,7 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                            children: const [
                               Text(
                                 "Ride Giver",
                                 style: TextStyle(
@@ -171,5 +185,55 @@ class _ChoiceScreenState extends State<ChoiceScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void didChangeViewFocus(ViewFocusEvent event) {
+    // TODO: implement didChangeViewFocus
+  }
+
+  @override
+  Future<bool> didPopRoute() {
+    // TODO: implement didPopRoute
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) {
+    // TODO: implement didPushRoute
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
+    // TODO: implement didPushRouteInformation
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppExitResponse> didRequestAppExit() {
+    // TODO: implement didRequestAppExit
+    throw UnimplementedError();
+  }
+
+  @override
+  void handleCancelBackGesture() {
+    // TODO: implement handleCancelBackGesture
+  }
+
+  @override
+  void handleCommitBackGesture() {
+    // TODO: implement handleCommitBackGesture
+  }
+
+  @override
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    // TODO: implement handleStartBackGesture
+    throw UnimplementedError();
+  }
+
+  @override
+  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    // TODO: implement handleUpdateBackGestureProgress
   }
 }
