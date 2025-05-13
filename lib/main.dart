@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Location Overlay Demo',
+      title: 'Ridealong App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -48,9 +48,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      // home: const HomeScreen(),
+      // Always start with HomeScreen which handles the location check
       home: const HomeScreen(),
-      // home: const ProfileSetupScreen(),
     );
   }
 }

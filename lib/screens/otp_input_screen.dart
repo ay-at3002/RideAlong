@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import 'home_screen.dart'; // Import your home screen
+import '../services/location_service.dart';
+import 'home_screen.dart';
 
 class OtpInputScreen extends StatefulWidget {
   final String phoneNumber;
@@ -17,23 +18,66 @@ class OtpInputScreen extends StatefulWidget {
   State<OtpInputScreen> createState() => _OtpInputScreenState();
 }
 
-class _OtpInputScreenState extends State<OtpInputScreen> {
+class _OtpInputScreenState extends State<OtpInputScreen> with WidgetsBindingObserver {
   final List<TextEditingController> _controllers = List.generate(
     4,
     (index) => TextEditingController(),
   );
   final AuthService _authService = AuthService();
+  final LocationService _locationService = LocationService();
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Register observer to detect app lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
+    // Check location status when screen first loads
+    _checkLocationStatus();
+  }
+
+  @override
   void dispose() {
+    // Remove observer when screen is disposed
+    WidgetsBinding.instance.removeObserver(this);
     for (var controller in _controllers) {
       controller.dispose();
     }
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Check location status when app resumes from background
+    if (state == AppLifecycleState.resumed) {
+      _checkLocationStatus();
+    }
+  }
+
+  // Check if location is enabled, navigate back to home if not
+  Future<void> _checkLocationStatus() async {
+    final isLocationEnabled = await _locationService.isLocationEnabled();
+    
+    if (!isLocationEnabled && mounted) {
+      // Navigate back to home screen where location overlay will be shown
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
+  }
+
   Future<void> _verifyOtp() async {
+    // Check location again before proceeding
+    final isLocationEnabled = await _locationService.isLocationEnabled();
+    if (!isLocationEnabled) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+      return;
+    }
+
     // Combine all digit controllers
     final String smsCode = _controllers.map((c) => c.text).join();
 
@@ -77,6 +121,17 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
   }
 
   void _resendOtp() async {
+    // Check location before resending OTP
+    final isLocationEnabled = await _locationService.isLocationEnabled();
+    if (!isLocationEnabled) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+      return;
+    }
+
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Sending a new OTP...')));

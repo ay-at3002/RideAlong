@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/location_service.dart';
+import 'home_screen.dart';
 import 'otp_input_screen.dart';
 
 class PhoneInputScreen extends StatefulWidget {
@@ -10,25 +12,63 @@ class PhoneInputScreen extends StatefulWidget {
   State<PhoneInputScreen> createState() => _PhoneInputScreenState();
 }
 
-class _PhoneInputScreenState extends State<PhoneInputScreen> {
+class _PhoneInputScreenState extends State<PhoneInputScreen> with WidgetsBindingObserver {
   final TextEditingController _phoneController = TextEditingController();
   final AuthService _authService = AuthService();
+  final LocationService _locationService = LocationService();
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    // Register observer to detect app lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
     // Pre-fill the phone number as shown in the design
     _phoneController.text = "+234 674 456 5903";
+    // Check location status when screen first loads
+    _checkLocationStatus();
   }
 
   @override
   void dispose() {
+    // Remove observer when screen is disposed
+    WidgetsBinding.instance.removeObserver(this);
     _phoneController.dispose();
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Check location status when app resumes from background
+    if (state == AppLifecycleState.resumed) {
+      _checkLocationStatus();
+    }
+  }
+
+  // Check if location is enabled, navigate back to home if not
+  Future<void> _checkLocationStatus() async {
+    final isLocationEnabled = await _locationService.isLocationEnabled();
+    
+    if (!isLocationEnabled && mounted) {
+      // Navigate back to home screen where location overlay will be shown
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
+  }
+
   Future<void> _verifyPhone() async {
+    // Check location again before proceeding
+    final isLocationEnabled = await _locationService.isLocationEnabled();
+    if (!isLocationEnabled) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
